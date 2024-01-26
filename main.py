@@ -1,35 +1,15 @@
-import typing
-
 import strawberry
 from fastapi import FastAPI
 from strawberry.asgi import GraphQL
 
+from apps.todos.resolver import Query
+from strawberry.tools import merge_types
 
-@strawberry.type
-class User:
-    name: str
-    age: int
+ComboQuery = merge_types("apps", (Query,))
 
+schema = strawberry.Schema(query=ComboQuery)
 
-@strawberry.type
-class Query:
-    @strawberry.field
-    def user(self) -> User:
-        return User(name="Patrick", age=100)
-
-    @strawberry.field
-    def users(self) -> typing.List[User]:
-        return [
-            User(
-                name="The Great Gatsby",
-                age=200,
-            ),
-        ]
-
-
-schema = strawberry.Schema(query=Query)
-
-graphql_app = GraphQL(schema)
+graphql_app = GraphQL(schema, debug=True)
 
 app = FastAPI()
 app.add_route("/graphql", graphql_app)
